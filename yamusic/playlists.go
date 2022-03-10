@@ -304,19 +304,31 @@ func (s *PlaylistsService) Rename(
 	kind int,
 	newName string,
 ) (*PlaylistsRenameResp, *http.Response, error) {
+	return changePlaylistField(ctx, kind, newName, "name")
+}
 
-	uri := fmt.Sprintf("users/%v/playlists/%v/name", s.client.userID, kind)
+func (s *PlaylistsService) ChangeDescription(
+	ctx context.Context,
+	kind int,
+	newDescription string,
+) (*PlaylistsRenameResp, *http.Response, error) {
+	return changePlaylistField(ctx, kind, newName, "description")
+}
 
+func (s *PlaylistsService) changePlaylistField(
+	ctx context.Context,
+	kind int,
+	newValue,
+	field string,
+) (*PlaylistsRenameResp, *http.Response, error) {
+	uri := fmt.Sprintf("users/%v/playlists/%v/%s", s.client.userID, kind, field)
 	form := url.Values{}
-	form.Set("value", newName)
-
+	form.Set("value", newValue)
 	req, err := s.client.NewRequest(http.MethodPost, uri, form)
 	if err != nil {
 		return nil, nil, err
 	}
-
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
 	renamedPlaylist := new(PlaylistsRenameResp)
 	resp, err := s.client.Do(ctx, req, renamedPlaylist)
 	return renamedPlaylist, resp, err
